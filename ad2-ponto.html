@@ -677,10 +677,20 @@ async function initAdm(){
   renderPontos(); renderDiario(); renderAlertas(); renderFuncs(); renderObras(); initPDF();
 }
 
-function openTab(tabId,btn){
+async function openTab(tabId,btn){
   document.querySelectorAll('.tab-panel').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(tabId).classList.add('active'); btn.classList.add('active');
+  // Recarrega dados do Sheets ao trocar de aba
+  loading(true,'Atualizando...');
+  await loadState();
+  loading(false);
+  if(tabId==='tab-pontos') renderPontos();
+  else if(tabId==='tab-alertas') renderAlertas();
+  else if(tabId==='tab-funcionarios') renderFuncs();
+  else if(tabId==='tab-obras') renderObras();
+  else if(tabId==='tab-diario') renderDiario();
+  else if(tabId==='tab-pdf') initPDF();
 }
 
 // ── PONTOS ──
@@ -696,7 +706,7 @@ function renderPontos(){
     tbl.innerHTML=`<thead><tr><th>Funcionário</th><th>Cargo</th><th>Entrada</th><th>Saída</th><th>Status</th><th></th></tr></thead>`;
     const tbody=document.createElement('tbody');
     funcs.forEach(f=>{
-      const p=state.pontos.find(x=>String(x.funcId)===String(f.id)&&x.data===data);
+      const p=state.pontos.find(x=>String(x.funcId)===String(f.id)&&String(x.data).slice(0,10)===data);
       let tag='<span class="tag falta">Falta</span>';
       let ent='—',sai='—';
       if(p){
