@@ -526,13 +526,20 @@ function iniciarGPS(){
 
 function verificarProximidade(){
   if(!currentFunc||userLat===null)return;
-  const obra=state.obras.find(o=>o.id===currentFunc.obraId);
+  const obra=state.obras.find(o=>String(o.id)===String(currentFunc.obraId));
   const el=document.getElementById('gps-status'),msg=document.getElementById('gps-msg');
-  if(!obra||!obra.lat){el.className='gps-status loading';msg.textContent='⚠️ Coordenadas da obra não configuradas.';gpsOk=true;atualizarBotoes();return;}
-  const d=distM(userLat,userLng,parseFloat(obra.lat),parseFloat(obra.lng));
-  if(d<=RAIO){el.className='gps-status ok';msg.textContent=`📍 Você está na obra (${Math.round(d)}m)`;gpsOk=true;}
-  else{el.className='gps-status err';msg.textContent=`❌ Fora da obra — ${Math.round(d)}m de distância`;gpsOk=false;}
+  if(!obra||!obra.lat){el.className='gps-status loading';msg.textContent='Coordenadas da obra nao configuradas.';gpsOk=true;atualizarBotoes();return;}
+  const obraLat=parseFloat(String(obra.lat).replace(/[^0-9.\-]/g,''));
+  const obraLng=parseFloat(String(obra.lng).replace(/[^0-9.\-]/g,''));
+  if(isNaN(obraLat)||isNaN(obraLng)){el.className='gps-status loading';msg.textContent='Coordenadas invalidas - edite a obra no ADM.';gpsOk=true;atualizarBotoes();return;}
+  const d=distM(userLat,userLng,obraLat,obraLng);
+  if(d<=RAIO){el.className='gps-status ok';msg.textContent='Voce esta na obra ('+Math.round(d)+'m)';gpsOk=true;}
+  else{el.className='gps-status err';msg.textContent='Fora da obra - '+Math.round(d)+'m de distancia';gpsOk=false;}
   atualizarBotoes();
+
+
+
+
 }
 
 function verificarJanela(tipo){
@@ -629,7 +636,7 @@ async function baterPonto(tipo){
   if(!gpsOk||!janela.ok){
     const obra=state.obras.find(o=>String(o.id)===String(currentFunc.obraId));
     let d2=null;
-    if(obra?.lat&&userLat!==null) d2=Math.round(distM(userLat,userLng,parseFloat(obra.lat),parseFloat(obra.lng)));
+    if(obra?.lat&&userLat!==null){const aLat=parseFloat(String(obra.lat).replace(/[^0-9.\-]/g,''));const aLng=parseFloat(String(obra.lng).replace(/[^0-9.\-]/g,''));if(!isNaN(aLat))d2=Math.round(distM(userLat,userLng,aLat,aLng));}
     const alerta={id:uid(),funcId:currentFunc.id,obraId:currentFunc.obraId,data:today(),hora:nowTime(),
       lat:userLat,lng:userLng,distancia:d2,tipo,motivo:!gpsOk?'fora_raio':'fora_janela'};
     state.alertas.unshift(alerta);
@@ -868,8 +875,10 @@ function abrirModalObra(id){
 
 async function salvarObra(){
   const nome=document.getElementById('mo-nome').value.trim(); if(!nome){alert('Informe o nome da obra.');return;}
+  const latRaw=document.getElementById('mo-lat').value.trim();
+  const lngRaw=document.getElementById('mo-lng').value.trim();
   const obj={id:editObraId||uid(),nome,cidade:document.getElementById('mo-cidade').value.trim(),
-    lat:document.getElementById('mo-lat').value.trim()||null,lng:document.getElementById('mo-lng').value.trim()||null,
+    lat:latRaw||null,lng:lngRaw||null,
     entIni:document.getElementById('mo-ent-ini').value,entFim:document.getElementById('mo-ent-fim').value,
     saiMin:document.getElementById('mo-sai-min').value};
   loading(true,'Salvando...');
