@@ -448,11 +448,15 @@ function diaSemana(d){ if(!d)return''; return new Date(d+'T12:00:00').toLocaleDa
 function normalizeTime(t){
   if(!t)return null;
   const s=String(t);
-  // formato HH:MM ou HH:MM:SS — já ok
+  // formato HH:MM ou HH:MM:SS — já ok, sem conversão de fuso
   if(/^\d{1,2}:\d{2}/.test(s)) return s.slice(0,5);
-  // formato ISO do Sheets: 1899-12-30T09:36:28.000Z
+  // formato ISO do Sheets: 1899-12-30T09:36:28.000Z — ajusta fuso UTC-3
   const m=s.match(/T(\d{2}):(\d{2})/);
-  if(m) return `${m[1]}:${m[2]}`;
+  if(m){
+    let h=parseInt(m[1])-3; // UTC-3 Brasil
+    if(h<0)h+=24;
+    return `${String(h).padStart(2,'0')}:${m[2]}`;
+  }
   return s.slice(0,5);
 }
 function timeToMin(t){ if(!t)return null; const n=normalizeTime(t); const[h,m]=n.split(':'); return parseInt(h)*60+parseInt(m); }
