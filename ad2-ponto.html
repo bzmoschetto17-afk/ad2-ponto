@@ -447,7 +447,7 @@ function diaSemana(d){ if(!d)return''; return new Date(d+'T12:00:00').toLocaleDa
 // Normaliza horário — corrige formato estranho do Google Sheets (ex: 1899-12-30T09:36:28.000Z)
 function normalizeTime(t){
   if(!t)return null;
-  const s=String(t);
+  let s=String(t).replace(/^'+/,'').trim(); // remove apóstrofo do Sheets
   // formato HH:MM ou HH:MM:SS — já ok, sem conversão de fuso
   if(/^\d{1,2}:\d{2}/.test(s)) return s.slice(0,5);
   // formato ISO do Sheets: 1899-12-30T09:36:28.000Z — ajusta fuso UTC-3
@@ -901,8 +901,8 @@ async function salvarObra(){
   const lngRaw=document.getElementById('mo-lng').value.trim();
   const obj={id:editObraId||uid(),nome,cidade:document.getElementById('mo-cidade').value.trim(),
     lat:latRaw||null,lng:lngRaw||null,
-    entIni:document.getElementById('mo-ent-ini').value,entFim:document.getElementById('mo-ent-fim').value,
-    saiMin:document.getElementById('mo-sai-min').value};
+    entIni:"'"+document.getElementById('mo-ent-ini').value,entFim:"'"+document.getElementById('mo-ent-fim').value,
+    saiMin:"'"+document.getElementById('mo-sai-min').value};
   loading(true,'Salvando...');
   await apiSave('obras', obj);
   if(editObraId){ const idx=state.obras.findIndex(x=>String(x.id)===String(editObraId)); state.obras[idx]=obj; }
