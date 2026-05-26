@@ -576,6 +576,15 @@ async function carregarFuncPonto(funcId){
     ji.style.display='block';
     ji.textContent=`⏰ Entrada: ${normalizeTime(obra.entIni)||'—'} – ${normalizeTime(obra.entFim)||'—'}  |  Saída mín.: ${normalizeTime(obra.saiMin)||'—'}`;
   }
+  // Verifica ponto de hoje no Sheets antes de mostrar botões
+  const dHoje=today();
+  const pontoHoje=state.pontos.find(x=>String(x.funcId)===String(f.id)&&String(x.data).slice(0,10)===dHoje);
+  if(pontoHoje){
+    document.getElementById('p-entrada-disp').textContent=normalizeTime(pontoHoje.entrada)||'—';
+    document.getElementById('p-entrada-disp').className='ponto-status-val'+(pontoHoje.entrada?' ok':'');
+    document.getElementById('p-saida-disp').textContent=normalizeTime(pontoHoje.saida)||'—';
+    document.getElementById('p-saida-disp').className='ponto-status-val'+(pontoHoje.saida?' ok':'');
+  }
   atualizarStatusPonto();
   goTo('screen-ponto');
   iniciarGPS();
@@ -589,7 +598,7 @@ function demoFunc(){
 
 function atualizarStatusPonto(){
   if(!currentFunc)return;
-  const d=today(),p=state.pontos.find(x=>String(x.funcId)===String(currentFunc.id)&&x.data===d);
+  const d=today(),p=state.pontos.find(x=>String(x.funcId)===String(currentFunc.id)&&String(x.data).slice(0,10)===d);
   const entEl=document.getElementById('p-entrada-disp'),saiEl=document.getElementById('p-saida-disp');
   if(p){
     entEl.textContent=normalizeTime(p.entrada)||'—'; entEl.className='ponto-status-val'+(p.entrada?' ok':'');
@@ -602,7 +611,7 @@ function atualizarStatusPonto(){
 }
 
 function atualizarBotoes(){
-  const d=today(),p=state.pontos.find(x=>String(x.funcId)===String(currentFunc?.id)&&x.data===d);
+  const d=today(),p=state.pontos.find(x=>String(x.funcId)===String(currentFunc?.id)&&String(x.data).slice(0,10)===d);
   const btnE=document.getElementById('btn-entrada'),btnS=document.getElementById('btn-saida');
   document.getElementById('feedback-box').style.display='none';
   if(p?.entrada&&p?.saida){
@@ -647,7 +656,7 @@ async function baterPonto(tipo){
   }
   const d=today(),hora=nowTime();
   loading(true,'Registrando ponto...');
-  let p=state.pontos.find(x=>String(x.funcId)===String(currentFunc.id)&&x.data===d);
+  let p=state.pontos.find(x=>String(x.funcId)===String(currentFunc.id)&&String(x.data).slice(0,10)===d);
   if(!p){
     p={id:uid(),funcId:currentFunc.id,obraId:currentFunc.obraId,data:d,entrada:null,saida:null,editado:false,obs:''};
     state.pontos.push(p);
