@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AD2 — Ponto Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#08111f; --blue:#0f2444; --mid:#1a3a6b; --accent:#1a3a6b;
+  --green:#2a7a3b; --accent2:#3a9a55; --steel:#7f9bbf; --light:#c8d8ef;
+  --white:#f0f6ff; --danger:#e05252; --success:#2a7a3b; --warning:#f2994a;
+  --card:#0d1e35; --border:rgba(26,58,107,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Barlow',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+.logo-wrap{display:inline-flex;align-items:center;background:#fff;border-radius:8px;padding:4px 12px;}
+.logo-ad{font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#1a3a6b;font-size:inherit;letter-spacing:-1px;}
+.logo-2{font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#2a7a3b;font-size:inherit;}
+
+/* LOADING OVERLAY */
+.loading-overlay{position:fixed;inset:0;background:rgba(8,17,31,.85);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;backdrop-filter:blur(4px);}
+.loading-overlay.hidden{display:none;}
+.spinner{width:40px;height:40px;border:3px solid rgba(42,122,59,.2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-msg{color:var(--steel);font-size:.85rem;letter-spacing:2px;text-transform:uppercase;}
+
+/* HOME */
+#screen-home{align-items:center;justify-content:center;padding:30px 20px;background:linear-gradient(160deg,#08111f 60%,#0d1e35 100%);}
+.home-sub{color:var(--steel);font-size:.85rem;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:40px;margin-top:10px;}
+.home-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;}
+.home-card-title{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--steel);margin-bottom:2px;}
+.btn-home{border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:2px;padding:16px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn-func{background:linear-gradient(135deg,#1a3a6b,#2a5aab);color:#fff;}
+.btn-func:hover{filter:brightness(1.1);transform:translateY(-2px);}
+.btn-adm{background:transparent;border:2px solid var(--border)!important;color:var(--steel);}
+.btn-adm:hover{border-color:var(--green)!important;color:var(--green);}
+
+/* PONTO */
+#screen-ponto{background:linear-gradient(180deg,#08111f 0%,#0d1e35 100%);}
+.ponto-header{padding:18px 20px 0;display:flex;align-items:center;gap:12px;}
+.back-btn{background:none;border:none;color:var(--steel);font-size:1.4rem;cursor:pointer;}
+.ponto-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;}
+.func-greeting{text-align:center;margin-bottom:20px;}
+.func-avatar{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--mid),#2a5aab);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:800;margin:0 auto 10px;}
+.func-name{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:2px;}
+.func-cargo{color:var(--steel);font-size:.78rem;letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
+.func-obra{display:inline-flex;align-items:center;gap:6px;background:rgba(42,122,59,.15);border:1px solid rgba(42,122,59,.3);border-radius:20px;padding:5px 14px;font-size:.8rem;color:var(--accent2);margin-top:10px;letter-spacing:1px;}
+.ponto-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;width:100%;max-width:380px;}
+.clock-display{text-align:center;margin-bottom:18px;}
+.clock-time{font-family:'Barlow Condensed',sans-serif;font-size:3.2rem;font-weight:800;letter-spacing:4px;color:var(--accent2);line-height:1;}
+.clock-date{color:var(--steel);font-size:.73rem;letter-spacing:2px;text-transform:uppercase;margin-top:5px;}
+.ponto-status-row{display:flex;gap:10px;margin-bottom:16px;}
+.ponto-status-item{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px;text-align:center;}
+.ponto-status-label{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--steel);margin-bottom:3px;}
+.ponto-status-val{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;color:var(--light);}
+.ponto-status-val.ok{color:var(--success);}
+.gps-status{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:10px;font-size:.8rem;margin-bottom:14px;border:1px solid;}
+.gps-status.loading{background:rgba(26,58,107,.15);border-color:var(--border);color:var(--steel);}
+.gps-status.ok{background:rgba(42,122,59,.1);border-color:rgba(42,122,59,.3);color:var(--success);}
+.gps-status.err{background:rgba(224,82,82,.1);border-color:rgba(224,82,82,.3);color:var(--danger);}
+.gps-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.janela-info{font-size:.72rem;color:var(--steel);text-align:center;margin-bottom:12px;padding:6px 10px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border);}
+.btn-ponto{width:100%;border:none;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-size:1.25rem;font-weight:800;letter-spacing:3px;padding:17px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn-entrada{background:linear-gradient(135deg,#1a5a2a,var(--success));color:#fff;}
+.btn-saida{background:linear-gradient(135deg,#6b3a1a,var(--warning));color:#fff;}
+.btn-ponto:disabled{opacity:.32;cursor:not-allowed;}
+.feedback-box{border-radius:12px;padding:14px;text-align:center;margin-top:10px;display:none;}
+.feedback-box.ok{background:rgba(42,122,59,.1);border:1px solid rgba(42,122,59,.3);}
+.feedback-box.err{background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);}
+.feedback-icon{font-size:1.8rem;margin-bottom:5px;}
+.feedback-msg{font-weight:700;font-size:.95rem;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
+.feedback-msg.ok{color:var(--success);}
+.feedback-msg.err{color:var(--danger);}
+.feedback-sub{color:var(--steel);font-size:.73rem;margin-top:3px;}
+
+/* ADM LOGIN */
+#screen-adm-login{align-items:center;justify-content:center;padding:30px 20px;}
+.adm-login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:34px;width:100%;max-width:340px;}
+.adm-login-title{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;}
+.adm-login-sub{color:var(--steel);font-size:.76rem;margin-bottom:22px;}
+.inp{width:100%;background:var(--navy);border:1px solid var(--border);color:var(--white);font-family:'Barlow',sans-serif;font-size:.93rem;padding:11px 14px;border-radius:10px;outline:none;transition:border .2s;margin-bottom:11px;}
+.inp:focus{border-color:var(--green);}
+.btn-primary{width:100%;background:var(--green);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;letter-spacing:2px;padding:13px;border-radius:10px;cursor:pointer;transition:background .2s;text-transform:uppercase;}
+.btn-primary:hover{background:#1f5c2c;}
+.login-err{color:var(--danger);font-size:.76rem;margin-top:6px;display:none;}
+
+/* ADM */
+#screen-adm{flex-direction:column;}
+.adm-header{background:linear-gradient(135deg,#0d1e35,#1a3a6b);border-bottom:3px solid var(--green);padding:0 18px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.adm-logout{background:none;border:1px solid var(--border);color:var(--steel);font-size:.76rem;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.adm-logout:hover{border-color:var(--danger);color:var(--danger);}
+.adm-tabs{display:flex;background:var(--blue);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.adm-tabs::-webkit-scrollbar{display:none;}
+.adm-tab{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:13px 16px;border:none;background:none;color:var(--steel);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all .2s;}
+.adm-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.adm-content{flex:1;padding:20px 16px 60px;max-width:980px;margin:0 auto;width:100%;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--light);margin-bottom:12px;border-left:3px solid var(--green);padding-left:11px;}
+
+.date-nav{display:flex;align-items:flex-end;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.date-nav label{display:block;color:var(--steel);font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.date-nav input[type=date]{background:var(--card);border:1px solid var(--border);color:var(--white);font-family:'Barlow',sans-serif;font-size:.86rem;padding:8px 11px;border-radius:8px;outline:none;}
+.obra-group{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.obra-group-header{background:rgba(26,58,107,.2);padding:10px 14px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);border-bottom:1px solid var(--border);}
+.ponto-table{width:100%;border-collapse:collapse;}
+.ponto-table th{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--steel);padding:9px 13px;text-align:left;background:rgba(0,0,0,.1);}
+.ponto-table td{padding:9px 13px;font-size:.86rem;border-bottom:1px solid rgba(26,58,107,.1);color:var(--light);vertical-align:middle;}
+.ponto-table tr:last-child td{border-bottom:none;}
+.ponto-table tr:hover td{background:rgba(42,122,59,.04);}
+.tag{display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;}
+.tag.presente{background:rgba(42,122,59,.15);color:var(--success);}
+.tag.falta{background:rgba(224,82,82,.15);color:var(--danger);}
+.tag.parcial{background:rgba(242,153,74,.15);color:var(--warning);}
+.tag.editado{background:rgba(86,150,242,.15);color:#5696f2;font-size:.58rem;}
+.btn-edit-ponto{background:none;border:1px solid var(--border);color:var(--steel);font-size:.72rem;padding:3px 9px;border-radius:5px;cursor:pointer;transition:all .2s;font-family:'Barlow',sans-serif;}
+.btn-edit-ponto:hover{border-color:var(--green);color:var(--green);}
+
+.alert-card{background:rgba(224,82,82,.06);border:1px solid rgba(224,82,82,.2);border-radius:10px;overflow:hidden;margin-bottom:8px;}
+.alert-header{background:rgba(224,82,82,.1);padding:8px 13px;font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--danger);border-bottom:1px solid rgba(224,82,82,.12);}
+.alert-item{display:flex;gap:10px;align-items:flex-start;padding:10px 13px;border-bottom:1px solid rgba(224,82,82,.06);}
+.alert-item:last-child{border-bottom:none;}
+.alert-info{flex:1;}
+.alert-nome{font-weight:600;font-size:.86rem;}
+.alert-det{font-size:.73rem;color:var(--steel);margin-top:2px;}
+
+.gest-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;}
+.btn-add{background:var(--green);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.86rem;font-weight:700;letter-spacing:1px;padding:9px 18px;border-radius:8px;cursor:pointer;transition:background .2s;}
+.btn-add:hover{background:#1f5c2c;}
+.list-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;}
+.list-item{display:flex;align-items:center;padding:12px 13px;border-bottom:1px solid rgba(26,58,107,.1);gap:11px;}
+.list-item:last-child{border-bottom:none;}
+.list-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--mid),#2a5aab);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.92rem;flex-shrink:0;}
+.list-info{flex:1;min-width:0;}
+.list-name{font-weight:600;font-size:.9rem;}
+.list-sub{font-size:.73rem;color:var(--steel);margin-top:2px;}
+.list-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.btn-sm{background:none;border:1px solid var(--border);color:var(--steel);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:.78rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.btn-sm:hover{border-color:var(--danger);color:var(--danger);}
+.btn-sm.edit:hover{border-color:var(--green);color:var(--green);}
+.badge-status{font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;}
+.badge-status.ativo{background:rgba(42,122,59,.15);color:var(--success);}
+.badge-status.afastado{background:rgba(242,153,74,.15);color:var(--warning);}
+.badge-status.ferias{background:rgba(86,150,242,.15);color:#5696f2;}
+.link-box{background:var(--navy);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:.68rem;color:#5696f2;word-break:break-all;cursor:pointer;transition:background .2s;margin-top:4px;}
+.link-box:hover{background:rgba(86,150,242,.1);}
+.coords-badge{display:inline-flex;align-items:center;gap:4px;border-radius:4px;padding:2px 8px;font-size:.65rem;margin-top:3px;}
+.coords-badge.ok{background:rgba(42,122,59,.1);border:1px solid rgba(42,122,59,.2);color:var(--success);}
+.coords-badge.sem{background:rgba(242,153,74,.1);border:1px solid rgba(242,153,74,.2);color:var(--warning);}
+.janela-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(26,58,107,.2);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:.65rem;color:var(--steel);margin-top:3px;margin-left:4px;}
+
+.diario-filtros{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;}
+.diario-filtros label{display:block;color:var(--steel);font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.diario-filtros select,.diario-filtros input{background:var(--card);border:1px solid var(--border);color:var(--white);font-family:'Barlow',sans-serif;font-size:.86rem;padding:8px 11px;border-radius:8px;outline:none;}
+.diario-entry{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.diario-entry-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(42,122,59,.06);}
+.diario-entry-date{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:2px;color:var(--accent2);}
+.diario-entry-body{padding:13px 14px;font-size:.88rem;color:var(--light);line-height:1.6;white-space:pre-wrap;}
+.btn-novo-registro{background:var(--green);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.86rem;font-weight:700;letter-spacing:1px;padding:9px 18px;border-radius:8px;cursor:pointer;transition:background .2s;}
+.btn-novo-registro:hover{background:#1f5c2c;}
+
+.pdf-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:14px;}
+.pdf-card-title{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--light);margin-bottom:16px;}
+.pdf-form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end;}
+.pdf-form-row label{display:block;color:var(--steel);font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.pdf-form-row select,.pdf-form-row input{background:var(--navy);border:1px solid var(--border);color:var(--white);font-family:'Barlow',sans-serif;font-size:.86rem;padding:9px 12px;border-radius:8px;outline:none;}
+.btn-gerar-pdf{background:linear-gradient(135deg,#1a3a6b,#2a5aab);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;padding:12px 24px;border-radius:10px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn-gerar-pdf:hover{filter:brightness(1.15);}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.overlay.open{display:flex;}
+.modal{background:#0f1f38;border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:440px;margin:16px;animation:modalIn .2s ease;max-height:90vh;overflow-y:auto;}
+@keyframes modalIn{from{opacity:0;transform:scale(.93) translateY(12px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;padding-bottom:11px;border-bottom:2px solid var(--green);}
+.form-row{margin-bottom:12px;}
+.form-label{display:block;font-size:.64rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);margin-bottom:5px;}
+.form-hint{font-size:.68rem;color:var(--steel);margin-top:4px;line-height:1.4;}
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+.btn-cancel{flex:1;background:none;border:1px solid var(--border);color:var(--steel);font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;padding:11px;border-radius:8px;cursor:pointer;}
+.btn-cancel:hover{border-color:var(--steel);color:var(--white);}
+.btn-save{flex:2;background:var(--green);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:1px;padding:11px;border-radius:8px;cursor:pointer;}
+.btn-save:hover{background:#1f5c2c;}
+textarea.inp{resize:vertical;min-height:100px;line-height:1.5;}
+
+@media(max-width:600px){
+  .ponto-table th:nth-child(5),.ponto-table td:nth-child(5){display:none;}
+  .pdf-form-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay hidden" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-msg" id="loading-msg">Carregando...</div>
+</div>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="logo-wrap" style="font-size:3rem;margin-bottom:10px;">
+    <span class="logo-ad">AD</span><span class="logo-2">2</span>
+  </div>
+  <div class="home-sub">Sistema de Ponto Digital</div>
+  <div class="home-card">
+    <div class="home-card-title">Acesso</div>
+    <button class="btn-home btn-func" onclick="demoFunc()">👷 Demo: Bater Ponto</button>
+    <button class="btn-home btn-adm" onclick="goTo('screen-adm-login')">🔐 Painel ADM</button>
+    <div style="font-size:.68rem;color:var(--steel);text-align:center;margin-top:2px;">Funcionários acessam via link individual</div>
+  </div>
+</div>
+
+<!-- PONTO FUNCIONÁRIO -->
+<div class="screen" id="screen-ponto">
+  <div class="ponto-header">
+    <button class="back-btn" onclick="goTo('screen-home')">←</button>
+    <div class="logo-wrap" style="font-size:1.1rem;">
+      <span class="logo-ad">AD</span><span class="logo-2">2</span>
+    </div>
+  </div>
+  <div class="ponto-body">
+    <div class="func-greeting">
+      <div class="func-avatar" id="p-avatar">?</div>
+      <div class="func-name" id="p-nome">—</div>
+      <div class="func-cargo" id="p-cargo">—</div>
+      <div class="func-obra" id="p-obra-badge">📍 —</div>
+    </div>
+    <div class="ponto-card">
+      <div class="clock-display">
+        <div class="clock-time" id="p-clock">00:00:00</div>
+        <div class="clock-date" id="p-date">—</div>
+      </div>
+      <div class="gps-status loading" id="gps-status">
+        <span class="gps-dot"></span><span id="gps-msg">Verificando localização...</span>
+      </div>
+      <div class="janela-info" id="janela-info" style="display:none;"></div>
+      <div class="ponto-status-row">
+        <div class="ponto-status-item">
+          <div class="ponto-status-label">Entrada</div>
+          <div class="ponto-status-val" id="p-entrada-disp">—</div>
+        </div>
+        <div class="ponto-status-item">
+          <div class="ponto-status-label">Saída</div>
+          <div class="ponto-status-val" id="p-saida-disp">—</div>
+        </div>
+      </div>
+      <button class="btn-ponto btn-entrada" id="btn-entrada" onclick="baterPonto('entrada')" disabled>▶ Registrar Entrada</button>
+      <button class="btn-ponto btn-saida" id="btn-saida" onclick="baterPonto('saida')" style="margin-top:10px;display:none;" disabled>⏹ Registrar Saída</button>
+      <div class="feedback-box" id="feedback-box">
+        <div class="feedback-icon" id="feedback-icon"></div>
+        <div class="feedback-msg" id="feedback-msg"></div>
+        <div class="feedback-sub" id="feedback-sub"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADM LOGIN -->
+<div class="screen" id="screen-adm-login">
+  <div class="adm-login-box">
+    <div style="margin-bottom:16px;">
+      <div class="logo-wrap" style="font-size:1.6rem;display:inline-flex;">
+        <span class="logo-ad">AD</span><span class="logo-2">2</span>
+      </div>
+    </div>
+    <div class="adm-login-title">Painel ADM</div>
+    <div class="adm-login-sub">Acesso restrito — AD2 Prestadora de Serviços</div>
+    <input class="inp" type="text" id="adm-user" placeholder="Usuário">
+    <input class="inp" type="password" id="adm-pass" placeholder="Senha" onkeydown="if(event.key==='Enter')admLogin()">
+    <button class="btn-primary" onclick="admLogin()">Entrar</button>
+    <div class="login-err" id="login-err">Usuário ou senha incorretos.</div>
+    <div style="margin-top:12px;text-align:center;">
+      <button style="background:none;border:none;color:var(--steel);font-size:.74rem;cursor:pointer;" onclick="goTo('screen-home')">← Voltar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADM PAINEL -->
+<div class="screen" id="screen-adm">
+  <div class="adm-header">
+    <div class="logo-wrap" style="font-size:1.3rem;display:inline-flex;">
+      <span class="logo-ad">AD</span><span class="logo-2">2</span>
+    </div>
+    <button class="adm-logout" onclick="goTo('screen-home')">Sair</button>
+  </div>
+  <div class="adm-tabs">
+    <button class="adm-tab active" onclick="openTab('tab-pontos',this)">Pontos</button>
+    <button class="adm-tab" onclick="openTab('tab-diario',this)">Diário de Obra</button>
+    <button class="adm-tab" onclick="openTab('tab-alertas',this)">⚠️ Alertas<span id="badge-alertas"></span></button>
+    <button class="adm-tab" onclick="openTab('tab-funcionarios',this)">Funcionários</button>
+    <button class="adm-tab" onclick="openTab('tab-obras',this)">Obras</button>
+    <button class="adm-tab" onclick="openTab('tab-pdf',this)">📄 Gerar PDF</button>
+  </div>
+  <div class="adm-content">
+    <div class="tab-panel active" id="tab-pontos">
+      <div class="date-nav">
+        <div><label>Data</label><input type="date" id="filtro-data" onchange="renderPontos()"></div>
+      </div>
+      <div class="section-title">Registro de Ponto</div>
+      <div id="pontos-container"></div>
+    </div>
+    <div class="tab-panel" id="tab-diario">
+      <div class="gest-top">
+        <div class="section-title" style="margin:0">Diário de Obra</div>
+        <button class="btn-novo-registro" onclick="abrirModalDiario()">+ Novo Registro</button>
+      </div>
+      <div class="diario-filtros">
+        <div><label>Obra</label><select id="diario-filtro-obra" onchange="renderDiario()"><option value="">Todas as obras</option></select></div>
+        <div><label>De</label><input type="date" id="diario-de" onchange="renderDiario()"></div>
+        <div><label>Até</label><input type="date" id="diario-ate" onchange="renderDiario()"></div>
+      </div>
+      <div id="diario-container"></div>
+    </div>
+    <div class="tab-panel" id="tab-alertas">
+      <div class="section-title">Tentativas Bloqueadas</div>
+      <div id="alertas-container"></div>
+    </div>
+    <div class="tab-panel" id="tab-funcionarios">
+      <div class="gest-top">
+        <div class="section-title" style="margin:0">Funcionários</div>
+        <button class="btn-add" onclick="abrirModalFunc()">+ Novo</button>
+      </div>
+      <div id="lista-funcs"></div>
+    </div>
+    <div class="tab-panel" id="tab-obras">
+      <div class="gest-top">
+        <div class="section-title" style="margin:0">Obras</div>
+        <button class="btn-add" onclick="abrirModalObra()">+ Nova Obra</button>
+      </div>
+      <div id="lista-obras"></div>
+    </div>
+    <div class="tab-panel" id="tab-pdf">
+      <div class="section-title">Gerar PDF</div>
+      <div class="pdf-card">
+        <div class="pdf-card-title">📋 Folha de Ponto</div>
+        <div class="pdf-form-row">
+          <div><label>De</label><input type="date" id="pdf-ponto-de"></div>
+          <div><label>Até</label><input type="date" id="pdf-ponto-ate"></div>
+          <div><label>Funcionário</label><select id="pdf-ponto-func"><option value="">Todos</option></select></div>
+        </div>
+        <button class="btn-gerar-pdf" onclick="gerarPDFPonto()">📥 Gerar Folha de Ponto</button>
+      </div>
+      <div class="pdf-card">
+        <div class="pdf-card-title">📓 Diário de Obra</div>
+        <div class="pdf-form-row">
+          <div><label>De</label><input type="date" id="pdf-diario-de"></div>
+          <div><label>Até</label><input type="date" id="pdf-diario-ate"></div>
+          <div><label>Obra</label><select id="pdf-diario-obra"><option value="">Todas</option></select></div>
+        </div>
+        <button class="btn-gerar-pdf" onclick="gerarPDFDiario()">📥 Gerar Diário de Obra</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAIS -->
+<div class="overlay" id="modal-editar-ponto">
+  <div class="modal">
+    <div class="modal-title">Editar Ponto</div>
+    <div style="font-size:.75rem;color:var(--warning);margin-bottom:14px;padding:8px 12px;background:rgba(242,153,74,.08);border:1px solid rgba(242,153,74,.2);border-radius:8px;">⚠️ Edição manual pela ADM — ficará registrado.</div>
+    <input type="hidden" id="ep-id">
+    <div class="form-row"><label class="form-label">Funcionário</label><input class="inp" type="text" id="ep-nome" disabled style="opacity:.5;"></div>
+    <div style="display:flex;gap:10px;">
+      <div class="form-row" style="flex:1"><label class="form-label">Entrada</label><input class="inp" type="time" id="ep-entrada"></div>
+      <div class="form-row" style="flex:1"><label class="form-label">Saída</label><input class="inp" type="time" id="ep-saida"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Observação</label><input class="inp" type="text" id="ep-obs" placeholder="Ex: Sem sinal na obra"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fecharModal('modal-editar-ponto')">Cancelar</button>
+      <button class="btn-save" onclick="salvarEdicaoPonto()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-func">
+  <div class="modal">
+    <div class="modal-title" id="mf-title">Novo Funcionário</div>
+    <div class="form-row"><label class="form-label">Nome completo</label><input class="inp" type="text" id="mf-nome"></div>
+    <div class="form-row"><label class="form-label">Cargo</label><input class="inp" type="text" id="mf-cargo"></div>
+    <div class="form-row"><label class="form-label">Obra alocada</label><select class="inp" id="mf-obra"></select></div>
+    <div class="form-row"><label class="form-label">Status</label>
+      <select class="inp" id="mf-status">
+        <option value="ativo">Ativo</option><option value="afastado">Afastado</option><option value="ferias">Férias</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fecharModal('modal-func')">Cancelar</button>
+      <button class="btn-save" onclick="salvarFunc()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-obra">
+  <div class="modal">
+    <div class="modal-title" id="mo-title">Nova Obra</div>
+    <div class="form-row"><label class="form-label">Nome da obra</label><input class="inp" type="text" id="mo-nome"></div>
+    <div class="form-row"><label class="form-label">Cidade</label><input class="inp" type="text" id="mo-cidade"></div>
+    <div style="display:flex;gap:10px;">
+      <div class="form-row" style="flex:1"><label class="form-label">Latitude</label><input class="inp" type="text" id="mo-lat" placeholder="-23.4521"><div class="form-hint">💡 Google Maps → clique na entrada da obra</div></div>
+      <div class="form-row" style="flex:1"><label class="form-label">Longitude</label><input class="inp" type="text" id="mo-lng" placeholder="-46.8734"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <div class="form-row" style="flex:1"><label class="form-label">Entrada — início</label><input class="inp" type="time" id="mo-ent-ini" value="06:30"></div>
+      <div class="form-row" style="flex:1"><label class="form-label">Entrada — fim</label><input class="inp" type="time" id="mo-ent-fim" value="07:30"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Saída mínima</label><input class="inp" type="time" id="mo-sai-min" value="16:30"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fecharModal('modal-obra')">Cancelar</button>
+      <button class="btn-save" onclick="salvarObra()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-diario">
+  <div class="modal">
+    <div class="modal-title" id="md-title">Novo Registro</div>
+    <input type="hidden" id="md-id">
+    <div class="form-row"><label class="form-label">Obra</label><select class="inp" id="md-obra"></select></div>
+    <div class="form-row"><label class="form-label">Data</label><input class="inp" type="date" id="md-data"></div>
+    <div class="form-row"><label class="form-label">Relato do dia</label><textarea class="inp" id="md-texto" placeholder="Descreva o que foi feito..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fecharModal('modal-diario')">Cancelar</button>
+      <button class="btn-save" onclick="salvarDiario()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbxkWHRXqk82itOpC1enMJUV806J-txa6o7JMIvD4SUL5lc4PleG_phQ2vWu5FbsR0fn/exec';
+const ADM_USER = 'adm';
+const ADM_PASS = 'ad2021';
+const RAIO = 50;
+
+let state = { obras:[], funcionarios:[], pontos:[], diario:[], alertas:[] };
+let currentFunc = null, userLat = null, userLng = null, gpsOk = false;
+let editFuncId = null, editObraId = null, editDiarioId = null;
+
+// ── UTILS ──
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function nowTime(){ return new Date().toTimeString().slice(0,5); }
+function fmtDate(d){ if(!d)return'—'; const[y,m,dia]=d.split('-'); return`${dia}/${m}/${y}`; }
+function diaSemana(d){ if(!d)return''; return new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long'}); }
+function timeToMin(t){ if(!t)return null; const[h,m]=t.split(':'); return parseInt(h)*60+parseInt(m); }
+
+function loading(show, msg='Aguarde...'){
+  document.getElementById('loading-overlay').classList.toggle('hidden', !show);
+  document.getElementById('loading-msg').textContent = msg;
+}
+
+// ── API ──
+async function api(params){
+  const url = API + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+async function apiSave(sheet, data){
+  return api({ action:'save', sheet, data: JSON.stringify(data) });
+}
+
+async function apiDelete(sheet, id){
+  return api({ action:'delete', sheet, id });
+}
+
+async function loadState(){
+  loading(true, 'Carregando dados...');
+  try {
+    const data = await api({ action:'getFullState' });
+    state.obras        = data.obras        || [];
+    state.funcionarios = data.funcionarios || [];
+    state.pontos       = data.pontos       || [];
+    state.diario       = data.diario       || [];
+    state.alertas      = data.alertas      || [];
+  } catch(e){ alert('Erro ao carregar dados. Verifique a conexão.'); }
+  loading(false);
+}
+
+// ── NAVIGATION ──
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── CLOCK ──
+(function tick(){
+  const n=new Date();
+  const el=document.getElementById('p-clock'),de=document.getElementById('p-date');
+  if(el)el.textContent=n.toTimeString().slice(0,8);
+  if(de)de.textContent=n.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  setTimeout(tick,1000);
+})();
+
+// ── GPS ──
+function distM(lat1,lng1,lat2,lng2){
+  const R=6371000,dL=(lat2-lat1)*Math.PI/180,dN=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dN/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function iniciarGPS(){
+  const el=document.getElementById('gps-status'),msg=document.getElementById('gps-msg');
+  if(!navigator.geolocation){el.className='gps-status err';msg.textContent='GPS não disponível.';return;}
+  el.className='gps-status loading';msg.textContent='Verificando localização...';
+  navigator.geolocation.watchPosition(pos=>{
+    userLat=pos.coords.latitude; userLng=pos.coords.longitude; verificarProximidade();
+  },()=>{ el.className='gps-status err'; msg.textContent='Permita o acesso à localização.'; gpsOk=false; atualizarBotoes(); },
+  {enableHighAccuracy:true,maximumAge:15000,timeout:20000});
+}
+
+function verificarProximidade(){
+  if(!currentFunc||userLat===null)return;
+  const obra=state.obras.find(o=>o.id===currentFunc.obraId);
+  const el=document.getElementById('gps-status'),msg=document.getElementById('gps-msg');
+  if(!obra||!obra.lat){el.className='gps-status loading';msg.textContent='⚠️ Coordenadas da obra não configuradas.';gpsOk=true;atualizarBotoes();return;}
+  const d=distM(userLat,userLng,parseFloat(obra.lat),parseFloat(obra.lng));
+  if(d<=RAIO){el.className='gps-status ok';msg.textContent=`📍 Você está na obra (${Math.round(d)}m)`;gpsOk=true;}
+  else{el.className='gps-status err';msg.textContent=`❌ Fora da obra — ${Math.round(d)}m de distância`;gpsOk=false;}
+  atualizarBotoes();
+}
+
+function verificarJanela(tipo){
+  if(!currentFunc)return{ok:true};
+  const obra=state.obras.find(o=>o.id===currentFunc.obraId);
+  if(!obra)return{ok:true};
+  const agora=timeToMin(nowTime());
+  if(tipo==='entrada'){
+    const ini=timeToMin(obra.entIni||'06:00'),fim=timeToMin(obra.entFim||'08:00');
+    const ok=agora>=ini&&agora<=fim;
+    return{ok,msg:ok?`Janela: ${obra.entIni}–${obra.entFim}`:`Fora da janela (${obra.entIni}–${obra.entFim})`};
+  } else {
+    const min=timeToMin(obra.saiMin||'16:00');
+    const ok=agora>=min;
+    return{ok,msg:ok?`Saída liberada`:`Saída mínima às ${obra.saiMin}`};
+  }
+}
+
+// ── MODO FUNC ──
+async function carregarFuncPonto(funcId){
+  loading(true,'Carregando...');
+  await loadState();
+  loading(false);
+  const f=state.funcionarios.find(x=>String(x.id)===String(funcId));
+  if(!f){alert('Funcionário não encontrado.');return;}
+  currentFunc=f;
+  const obra=state.obras.find(o=>String(o.id)===String(f.obraId));
+  document.getElementById('p-nome').textContent=f.nome;
+  document.getElementById('p-cargo').textContent=f.cargo||'Funcionário';
+  document.getElementById('p-avatar').textContent=f.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+  document.getElementById('p-obra-badge').textContent='📍 '+(obra?obra.nome:'Sem obra');
+  if(obra){
+    const ji=document.getElementById('janela-info');
+    ji.style.display='block';
+    ji.textContent=`⏰ Entrada: ${obra.entIni||'—'} – ${obra.entFim||'—'}  |  Saída mín.: ${obra.saiMin||'—'}`;
+  }
+  atualizarStatusPonto();
+  goTo('screen-ponto');
+  iniciarGPS();
+}
+
+function demoFunc(){
+  const f=state.funcionarios.find(x=>x.status==='ativo');
+  if(f) carregarFuncPonto(f.id);
+  else alert('Nenhum funcionário ativo cadastrado.');
+}
+
+function atualizarStatusPonto(){
+  if(!currentFunc)return;
+  const d=today(),p=state.pontos.find(x=>String(x.funcId)===String(currentFunc.id)&&x.data===d);
+  const entEl=document.getElementById('p-entrada-disp'),saiEl=document.getElementById('p-saida-disp');
+  if(p){
+    entEl.textContent=p.entrada||'—'; entEl.className='ponto-status-val'+(p.entrada?' ok':'');
+    saiEl.textContent=p.saida||'—';   saiEl.className='ponto-status-val'+(p.saida?' ok':'');
+  } else {
+    entEl.textContent='—'; entEl.className='ponto-status-val';
+    saiEl.textContent='—'; saiEl.className='ponto-status-val';
+  }
+  atualizarBotoes();
+}
+
+function atualizarBotoes(){
+  const d=today(),p=state.pontos.find(x=>String(x.funcId)===String(currentFunc?.id)&&x.data===d);
+  const btnE=document.getElementById('btn-entrada'),btnS=document.getElementById('btn-saida');
+  document.getElementById('feedback-box').style.display='none';
+  if(p?.entrada&&p?.saida){
+    btnE.style.display='none'; btnS.style.display='none';
+    showFeedback('ok','✅','Ponto completo!',`Entrada ${p.entrada} · Saída ${p.saida}`); return;
+  }
+  const tipo=(!p||!p.entrada)?'entrada':'saida';
+  const janela=verificarJanela(tipo);
+  if(!p||!p.entrada){
+    btnE.style.display='block'; btnS.style.display='none';
+    btnE.disabled=!gpsOk||!janela.ok;
+    if(!janela.ok) showFeedback('err','⏰',janela.msg,'Aguarde o horário permitido.');
+  } else {
+    btnE.style.display='none'; btnS.style.display='block';
+    btnS.disabled=!gpsOk||!janela.ok;
+    if(!janela.ok) showFeedback('err','⏰',janela.msg,'Aguarde o horário mínimo.');
+  }
+}
+
+function showFeedback(tipo,icon,msg,sub){
+  const fb=document.getElementById('feedback-box');
+  fb.className='feedback-box '+tipo; fb.style.display='block';
+  document.getElementById('feedback-icon').textContent=icon;
+  document.getElementById('feedback-msg').textContent=msg;
+  document.getElementById('feedback-msg').className='feedback-msg '+tipo;
+  document.getElementById('feedback-sub').textContent=sub;
+}
+
+async function baterPonto(tipo){
+  const janela=verificarJanela(tipo);
+  if(!gpsOk||!janela.ok){
+    const obra=state.obras.find(o=>String(o.id)===String(currentFunc.obraId));
+    let d2=null;
+    if(obra?.lat&&userLat!==null) d2=Math.round(distM(userLat,userLng,parseFloat(obra.lat),parseFloat(obra.lng)));
+    const alerta={id:uid(),funcId:currentFunc.id,obraId:currentFunc.obraId,data:today(),hora:nowTime(),
+      lat:userLat,lng:userLng,distancia:d2,tipo,motivo:!gpsOk?'fora_raio':'fora_janela'};
+    state.alertas.unshift(alerta);
+    apiSave('alertas', alerta);
+    showFeedback('err','❌',!gpsOk?'Você não está na obra!':janela.msg,
+      d2?`${d2}m de distância.`:(!gpsOk?'Aproxime-se do local.':'Aguarde o horário.'));
+    return;
+  }
+  const d=today(),hora=nowTime();
+  loading(true,'Registrando ponto...');
+  let p=state.pontos.find(x=>String(x.funcId)===String(currentFunc.id)&&x.data===d);
+  if(!p){
+    p={id:uid(),funcId:currentFunc.id,obraId:currentFunc.obraId,data:d,entrada:null,saida:null,editado:false,obs:''};
+    state.pontos.push(p);
+  }
+  if(tipo==='entrada') p.entrada=hora;
+  else p.saida=hora;
+  await apiSave('pontos', p);
+  loading(false);
+  showFeedback('ok','✅',tipo==='entrada'?'Entrada registrada!':'Saída registrada!',`Horário: ${hora}`);
+  setTimeout(()=>atualizarStatusPonto(),1400);
+}
+
+// ── ADM ──
+function admLogin(){
+  const u=document.getElementById('adm-user').value.trim(),p=document.getElementById('adm-pass').value;
+  if(u===ADM_USER&&p===ADM_PASS){
+    document.getElementById('login-err').style.display='none';
+    initAdm(); goTo('screen-adm');
+  } else document.getElementById('login-err').style.display='block';
+}
+
+async function initAdm(){
+  loading(true,'Carregando dados...');
+  await loadState();
+  loading(false);
+  const fd=document.getElementById('filtro-data'); if(!fd.value) fd.value=today();
+  renderPontos(); renderDiario(); renderAlertas(); renderFuncs(); renderObras(); initPDF();
+}
+
+function openTab(tabId,btn){
+  document.querySelectorAll('.tab-panel').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active'); btn.classList.add('active');
+}
+
+// ── PONTOS ──
+function renderPontos(){
+  const data=document.getElementById('filtro-data').value||today();
+  const cont=document.getElementById('pontos-container'); cont.innerHTML='';
+  state.obras.forEach(obra=>{
+    const funcs=state.funcionarios.filter(f=>String(f.obraId)===String(obra.id));
+    if(!funcs.length)return;
+    const div=document.createElement('div'); div.className='obra-group';
+    div.innerHTML=`<div class="obra-group-header">📍 ${obra.nome} — ${obra.cidade}</div>`;
+    const tbl=document.createElement('table'); tbl.className='ponto-table';
+    tbl.innerHTML=`<thead><tr><th>Funcionário</th><th>Cargo</th><th>Entrada</th><th>Saída</th><th>Status</th><th></th></tr></thead>`;
+    const tbody=document.createElement('tbody');
+    funcs.forEach(f=>{
+      const p=state.pontos.find(x=>String(x.funcId)===String(f.id)&&x.data===data);
+      let tag='<span class="tag falta">Falta</span>';
+      let ent='—',sai='—';
+      if(p){
+        ent=p.entrada||'—'; sai=p.saida||'—';
+        if(p.entrada&&p.saida) tag='<span class="tag presente">Presente</span>';
+        else if(p.entrada) tag='<span class="tag parcial">Em obra</span>';
+        if(p.editado==='true'||p.editado===true) tag+=' <span class="tag editado">editado ADM</span>';
+      }
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${f.nome}</td><td>${f.cargo||'—'}</td><td>${ent}</td><td>${sai}</td><td>${tag}</td>
+        <td><button class="btn-edit-ponto" onclick="abrirEdicaoPonto('${f.id}','${data}')">✏️ Editar</button></td>`;
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody); div.appendChild(tbl); cont.appendChild(div);
+  });
+  if(!cont.innerHTML) cont.innerHTML='<div style="color:var(--steel);text-align:center;padding:32px;">Nenhum registro para esta data.</div>';
+}
+
+function abrirEdicaoPonto(funcId,data){
+  const f=state.funcionarios.find(x=>String(x.id)===String(funcId));
+  let p=state.pontos.find(x=>String(x.funcId)===String(funcId)&&x.data===data);
+  if(!p){ p={id:uid(),funcId,obraId:f.obraId,data,entrada:null,saida:null,editado:false,obs:''}; state.pontos.push(p); }
+  document.getElementById('ep-id').value=p.id;
+  document.getElementById('ep-nome').value=f.nome;
+  document.getElementById('ep-entrada').value=p.entrada||'';
+  document.getElementById('ep-saida').value=p.saida||'';
+  document.getElementById('ep-obs').value=p.obs||'';
+  abrirModal('modal-editar-ponto');
+}
+
+async function salvarEdicaoPonto(){
+  const id=document.getElementById('ep-id').value;
+  let p=state.pontos.find(x=>x.id===id);
+  if(!p)return;
+  p.entrada=document.getElementById('ep-entrada').value||null;
+  p.saida=document.getElementById('ep-saida').value||null;
+  p.obs=document.getElementById('ep-obs').value;
+  p.editado=true;
+  loading(true,'Salvando...');
+  await apiSave('pontos', p);
+  loading(false);
+  fecharModal('modal-editar-ponto'); renderPontos();
+}
+
+// ── ALERTAS ──
+function renderAlertas(){
+  const cont=document.getElementById('alertas-container');
+  document.getElementById('badge-alertas').textContent=state.alertas.length?` (${state.alertas.length})`:'';
+  cont.innerHTML='';
+  if(!state.alertas.length){cont.innerHTML='<div style="color:var(--steel);text-align:center;padding:32px;">Nenhuma tentativa bloqueada. ✅</div>';return;}
+  const datas=[...new Set(state.alertas.map(a=>a.data))].sort((a,b)=>b.localeCompare(a));
+  datas.forEach(data=>{
+    const grupo=state.alertas.filter(a=>a.data===data);
+    const div=document.createElement('div'); div.className='alert-card';
+    div.innerHTML=`<div class="alert-header">⚠️ ${fmtDate(data)} — ${grupo.length} tentativa${grupo.length>1?'s':''} bloqueada${grupo.length>1?'s':''}</div>`;
+    grupo.forEach(a=>{
+      const f=state.funcionarios.find(x=>String(x.id)===String(a.funcId));
+      const o=state.obras.find(x=>String(x.id)===String(a.obraId));
+      const motivo=a.motivo==='fora_janela'?'fora da janela de horário':'fora do raio GPS';
+      const item=document.createElement('div'); item.className='alert-item';
+      item.innerHTML=`<div>🚫</div><div class="alert-info">
+        <div class="alert-nome">${f?f.nome:'—'} — tentou registrar <strong>${a.tipo==='entrada'?'entrada':'saída'}</strong> às ${a.hora}</div>
+        <div class="alert-det">Obra: ${o?o.nome:'—'} · ${motivo}${a.distancia?' · '+a.distancia+'m':''}</div>
+      </div>`;
+      div.appendChild(item);
+    });
+    cont.appendChild(div);
+  });
+}
+
+// ── FUNCIONÁRIOS ──
+function renderFuncs(){
+  const cont=document.getElementById('lista-funcs'); cont.innerHTML='';
+  state.funcionarios.forEach(f=>{
+    const obra=state.obras.find(o=>String(o.id)===String(f.obraId));
+    const ini=f.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+    const link=`${location.href.split('?')[0]}?func=${f.id}`;
+    const div=document.createElement('div'); div.className='list-card';
+    div.innerHTML=`<div class="list-item">
+      <div class="list-avatar">${ini}</div>
+      <div class="list-info">
+        <div class="list-name">${f.nome}</div>
+        <div class="list-sub">${f.cargo||'—'} · ${obra?obra.nome:'Sem obra'}</div>
+        <div class="link-box" onclick="copiarLink('${link}',this)">🔗 Copiar link do ponto</div>
+      </div>
+      <div class="list-actions" style="flex-direction:column;gap:5px;align-items:flex-end;">
+        <span class="badge-status ${f.status}">${{ativo:'Ativo',afastado:'Afastado',ferias:'Férias'}[f.status]}</span>
+        <div style="display:flex;gap:5px;">
+          <button class="btn-sm edit" onclick="abrirModalFunc('${f.id}')">✏️</button>
+          <button class="btn-sm" onclick="excluirFunc('${f.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+    cont.appendChild(div);
+  });
+  if(!state.funcionarios.length) cont.innerHTML='<div style="color:var(--steel);text-align:center;padding:32px;">Nenhum funcionário cadastrado.</div>';
+}
+
+function copiarLink(link,el){
+  navigator.clipboard.writeText(link).then(()=>{
+    el.textContent='✅ Copiado! Envie pelo WhatsApp.';
+    setTimeout(()=>{ el.textContent='🔗 Copiar link do ponto'; },2500);
+  });
+}
+
+function abrirModalFunc(id){
+  editFuncId=id||null;
+  const f=id?state.funcionarios.find(x=>String(x.id)===String(id)):{};
+  document.getElementById('mf-title').textContent=id?'Editar Funcionário':'Novo Funcionário';
+  document.getElementById('mf-nome').value=f.nome||'';
+  document.getElementById('mf-cargo').value=f.cargo||'';
+  document.getElementById('mf-status').value=f.status||'ativo';
+  const sel=document.getElementById('mf-obra'); sel.innerHTML='<option value="">— Sem obra —</option>';
+  state.obras.forEach(o=>{const op=document.createElement('option');op.value=o.id;op.textContent=o.nome;if(String(o.id)===String(f.obraId))op.selected=true;sel.appendChild(op);});
+  abrirModal('modal-func');
+}
+
+async function salvarFunc(){
+  const nome=document.getElementById('mf-nome').value.trim(); if(!nome){alert('Informe o nome.');return;}
+  const obj={id:editFuncId||uid(),nome,cargo:document.getElementById('mf-cargo').value.trim(),obraId:document.getElementById('mf-obra').value||null,status:document.getElementById('mf-status').value};
+  loading(true,'Salvando...');
+  await apiSave('funcionarios', obj);
+  if(editFuncId){ const idx=state.funcionarios.findIndex(x=>String(x.id)===String(editFuncId)); state.funcionarios[idx]=obj; }
+  else state.funcionarios.push(obj);
+  loading(false); fecharModal('modal-func'); renderFuncs();
+}
+
+async function excluirFunc(id){
+  const f=state.funcionarios.find(x=>String(x.id)===String(id));
+  if(confirm(`Remover "${f.nome}"?`)){
+    loading(true,'Removendo...');
+    await apiDelete('funcionarios', id);
+    state.funcionarios=state.funcionarios.filter(x=>String(x.id)!==String(id));
+    loading(false); renderFuncs();
+  }
+}
+
+// ── OBRAS ──
+function renderObras(){
+  const cont=document.getElementById('lista-obras'); cont.innerHTML='';
+  state.obras.forEach(o=>{
+    const qtd=state.funcionarios.filter(f=>String(f.obraId)===String(o.id)).length;
+    const temGps=o.lat&&o.lng;
+    const div=document.createElement('div'); div.className='list-card';
+    div.innerHTML=`<div class="list-item">
+      <div class="list-avatar" style="border-radius:10px;font-size:1.2rem;">🏗️</div>
+      <div class="list-info">
+        <div class="list-name">${o.nome}</div>
+        <div class="list-sub">${o.cidade} · ${qtd} funcionário${qtd!==1?'s':''}</div>
+        <span class="coords-badge ${temGps?'ok':'sem'}">${temGps?`📍 ${parseFloat(o.lat).toFixed(4)}, ${parseFloat(o.lng).toFixed(4)}`:'⚠️ GPS não configurado'}</span>
+        <span class="janela-badge">⏰ ${o.entIni||'—'}–${o.entFim||'—'} · saída ${o.saiMin||'—'}</span>
+      </div>
+      <div class="list-actions">
+        <button class="btn-sm edit" onclick="abrirModalObra('${o.id}')">✏️</button>
+        <button class="btn-sm" onclick="excluirObra('${o.id}')">🗑️</button>
+      </div>
+    </div>`;
+    cont.appendChild(div);
+  });
+  if(!state.obras.length) cont.innerHTML='<div style="color:var(--steel);text-align:center;padding:32px;">Nenhuma obra cadastrada.</div>';
+}
+
+function abrirModalObra(id){
+  editObraId=id||null;
+  const o=id?state.obras.find(x=>String(x.id)===String(id)):{};
+  document.getElementById('mo-title').textContent=id?'Editar Obra':'Nova Obra';
+  document.getElementById('mo-nome').value=o.nome||'';
+  document.getElementById('mo-cidade').value=o.cidade||'';
+  document.getElementById('mo-lat').value=o.lat||'';
+  document.getElementById('mo-lng').value=o.lng||'';
+  document.getElementById('mo-ent-ini').value=o.entIni||'06:30';
+  document.getElementById('mo-ent-fim').value=o.entFim||'07:30';
+  document.getElementById('mo-sai-min').value=o.saiMin||'16:30';
+  abrirModal('modal-obra');
+}
+
+async function salvarObra(){
+  const nome=document.getElementById('mo-nome').value.trim(); if(!nome){alert('Informe o nome da obra.');return;}
+  const obj={id:editObraId||uid(),nome,cidade:document.getElementById('mo-cidade').value.trim(),
+    lat:document.getElementById('mo-lat').value.trim()||null,lng:document.getElementById('mo-lng').value.trim()||null,
+    entIni:document.getElementById('mo-ent-ini').value,entFim:document.getElementById('mo-ent-fim').value,
+    saiMin:document.getElementById('mo-sai-min').value};
+  loading(true,'Salvando...');
+  await apiSave('obras', obj);
+  if(editObraId){ const idx=state.obras.findIndex(x=>String(x.id)===String(editObraId)); state.obras[idx]=obj; }
+  else state.obras.push(obj);
+  loading(false); fecharModal('modal-obra'); renderObras();
+}
+
+async function excluirObra(id){
+  const o=state.obras.find(x=>String(x.id)===String(id));
+  if(confirm(`Remover "${o.nome}"?`)){
+    loading(true,'Removendo...');
+    await apiDelete('obras', id);
+    state.obras=state.obras.filter(x=>String(x.id)!==String(id));
+    loading(false); renderObras();
+  }
+}
+
+// ── DIÁRIO ──
+function renderDiario(){
+  const obraFilt=document.getElementById('diario-filtro-obra').value;
+  const de=document.getElementById('diario-de').value;
+  const ate=document.getElementById('diario-ate').value;
+  const cont=document.getElementById('diario-container'); cont.innerHTML='';
+  let registros=[...state.diario];
+  if(obraFilt) registros=registros.filter(r=>String(r.obraId)===String(obraFilt));
+  if(de)  registros=registros.filter(r=>r.data>=de);
+  if(ate) registros=registros.filter(r=>r.data<=ate);
+  registros.sort((a,b)=>b.data.localeCompare(a.data));
+  if(!registros.length){cont.innerHTML='<div style="color:var(--steel);text-align:center;padding:32px;">Nenhum registro encontrado.</div>';return;}
+  registros.forEach(r=>{
+    const obra=state.obras.find(o=>String(o.id)===String(r.obraId));
+    const div=document.createElement('div'); div.className='diario-entry';
+    div.innerHTML=`<div class="diario-entry-header">
+      <span class="diario-entry-date">📍 ${obra?obra.nome:'—'} — ${fmtDate(r.data)} (${diaSemana(r.data)})</span>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-sm edit" onclick="abrirModalDiario('${r.id}')">✏️</button>
+        <button class="btn-sm" onclick="excluirDiario('${r.id}')">🗑️</button>
+      </div>
+    </div>
+    <div class="diario-entry-body">${r.texto||''}</div>`;
+    cont.appendChild(div);
+  });
+}
+
+function abrirModalDiario(id){
+  editDiarioId=id||null;
+  const r=id?state.diario.find(x=>String(x.id)===String(id)):{};
+  document.getElementById('md-title').textContent=id?'Editar Registro':'Novo Registro';
+  document.getElementById('md-id').value=id||'';
+  document.getElementById('md-data').value=r.data||today();
+  document.getElementById('md-texto').value=r.texto||'';
+  const sel=document.getElementById('md-obra'); sel.innerHTML='';
+  state.obras.forEach(o=>{const op=document.createElement('option');op.value=o.id;op.textContent=o.nome;if(String(o.id)===String(r.obraId))op.selected=true;sel.appendChild(op);});
+  abrirModal('modal-diario');
+}
+
+async function salvarDiario(){
+  const texto=document.getElementById('md-texto').value.trim(); if(!texto){alert('Digite o relato.');return;}
+  const obj={id:editDiarioId||uid(),obraId:document.getElementById('md-obra').value,data:document.getElementById('md-data').value,texto};
+  loading(true,'Salvando...');
+  await apiSave('diario', obj);
+  if(editDiarioId){ const idx=state.diario.findIndex(x=>String(x.id)===String(editDiarioId)); state.diario[idx]=obj; }
+  else state.diario.push(obj);
+  loading(false); fecharModal('modal-diario'); renderDiario();
+}
+
+async function excluirDiario(id){
+  if(confirm('Remover este registro?')){
+    loading(true,'Removendo...');
+    await apiDelete('diario', id);
+    state.diario=state.diario.filter(x=>String(x.id)!==String(id));
+    loading(false); renderDiario();
+  }
+}
+
+// ── PDF ──
+function initPDF(){
+  const fs=document.getElementById('pdf-ponto-func'); fs.innerHTML='<option value="">Todos</option>';
+  state.funcionarios.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.nome;fs.appendChild(o);});
+  const os=document.getElementById('pdf-diario-obra'); os.innerHTML='<option value="">Todas</option>';
+  state.obras.forEach(o=>{const op=document.createElement('option');op.value=o.id;op.textContent=o.nome;os.appendChild(op);});
+  // popular filtro do diário
+  const df=document.getElementById('diario-filtro-obra'); df.innerHTML='<option value="">Todas as obras</option>';
+  state.obras.forEach(o=>{const op=document.createElement('option');op.value=o.id;op.textContent=o.nome;df.appendChild(op);});
+}
+
+function gerarPDFPonto(){
+  const de=document.getElementById('pdf-ponto-de').value;
+  const ate=document.getElementById('pdf-ponto-ate').value;
+  const funcFilt=document.getElementById('pdf-ponto-func').value;
+  if(!de||!ate){alert('Selecione o período.');return;}
+  const funcs=funcFilt?state.funcionarios.filter(f=>String(f.id)===String(funcFilt)):state.funcionarios;
+  let html=cabecalhoPDF('FOLHA DE PONTO',`${fmtDate(de)} a ${fmtDate(ate)}`);
+  funcs.forEach(f=>{
+    const obra=state.obras.find(o=>String(o.id)===String(f.obraId));
+    const pontos=state.pontos.filter(p=>String(p.funcId)===String(f.id)&&p.data>=de&&p.data<=ate).sort((a,b)=>a.data.localeCompare(b.data));
+    const presentes=pontos.filter(p=>p.entrada&&p.saida).length;
+    html+=`<div style="margin-bottom:28px;">
+      <div style="background:#1a3a6b;color:#fff;padding:10px 14px;border-radius:6px 6px 0 0;display:flex;justify-content:space-between;">
+        <span style="font-weight:700;">${f.nome} — ${f.cargo||'—'}</span>
+        <span style="opacity:.8;font-size:.85rem;">Obra: ${obra?obra.nome:'—'}</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;">
+        <thead><tr style="background:#f0f4f8;">
+          <th style="padding:7px 10px;font-size:.75rem;border:1px solid #ddd;text-align:left;">Data</th>
+          <th style="padding:7px 10px;font-size:.75rem;border:1px solid #ddd;text-align:left;">Dia</th>
+          <th style="padding:7px 10px;font-size:.75rem;border:1px solid #ddd;text-align:left;">Obra</th>
+          <th style="padding:7px 10px;font-size:.75rem;border:1px solid #ddd;text-align:left;">Entrada</th>
+          <th style="padding:7px 10px;font-size:.75rem;border:1px solid #ddd;text-align:left;">Saída</th>
+          <th style="padding:7px 10px;font-size:.75rem;border:1px solid #ddd;text-align:left;">Status</th>
+        </tr></thead><tbody>`;
+    let cur=new Date(de+'T12:00:00'); const fim=new Date(ate+'T12:00:00');
+    while(cur<=fim){
+      const dStr=cur.toISOString().slice(0,10);
+      const p=pontos.find(x=>x.data===dStr);
+      const obraP=p?state.obras.find(o=>String(o.id)===String(p.obraId)):obra;
+      const status=p?(p.entrada&&p.saida?'Presente':p.entrada?'Em obra':'Falta'):'Falta';
+      const cor=status==='Presente'?'#d4edda':status==='Em obra'?'#fff3cd':'#fde8e8';
+      html+=`<tr style="background:${(p?.editado==='true'||p?.editado===true)?'#e8f0fe':cor};">
+        <td style="padding:6px 10px;border:1px solid #ddd;font-size:.8rem;">${fmtDate(dStr)}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;font-size:.8rem;text-transform:capitalize;">${diaSemana(dStr)}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;font-size:.8rem;">${obraP?obraP.nome:'—'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;font-size:.8rem;">${p?.entrada||'—'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;font-size:.8rem;">${p?.saida||'—'}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;font-size:.78rem;font-weight:600;">${status}${(p?.editado==='true'||p?.editado===true)?' *':''}</td>
+      </tr>`;
+      cur.setDate(cur.getDate()+1);
+    }
+    html+=`</tbody></table>
+      <div style="padding:8px 10px;background:#f9f9f9;border:1px solid #ddd;border-top:none;font-size:.78rem;color:#555;">
+        Dias completos: <strong>${presentes}</strong>${pontos.some(p=>p.editado==='true'||p.editado===true)?' · * Editado pela ADM':''}
+      </div></div>`;
+  });
+  html+=rodapePDF(); abrirJanelaPDF(html);
+}
+
+function gerarPDFDiario(){
+  const de=document.getElementById('pdf-diario-de').value;
+  const ate=document.getElementById('pdf-diario-ate').value;
+  const obraFilt=document.getElementById('pdf-diario-obra').value;
+  if(!de||!ate){alert('Selecione o período.');return;}
+  const obras=obraFilt?state.obras.filter(o=>String(o.id)===String(obraFilt)):state.obras;
+  let html=cabecalhoPDF('DIÁRIO DE OBRA',`${fmtDate(de)} a ${fmtDate(ate)}`);
+  obras.forEach(obra=>{
+    const registros=state.diario.filter(r=>String(r.obraId)===String(obra.id)&&r.data>=de&&r.data<=ate).sort((a,b)=>a.data.localeCompare(b.data));
+    if(!registros.length)return;
+    html+=`<div style="margin-bottom:28px;">
+      <div style="background:#1a3a6b;color:#fff;padding:10px 14px;border-radius:6px 6px 0 0;">
+        <strong>📍 ${obra.nome} — ${obra.cidade}</strong>
+      </div>`;
+    registros.forEach((r,i)=>{
+      html+=`<div style="border:1px solid #ddd;${i>0?'border-top:none':'border-top:1px solid #ddd'};padding:12px 14px;">
+        <div style="font-weight:700;font-size:.85rem;color:#1a3a6b;margin-bottom:6px;text-transform:capitalize;">
+          ${fmtDate(r.data)} — ${diaSemana(r.data)}
+        </div>
+        <div style="font-size:.82rem;color:#333;line-height:1.6;white-space:pre-wrap;">${r.texto}</div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  html+=rodapePDF(); abrirJanelaPDF(html);
+}
+
+function cabecalhoPDF(titulo,periodo){
+  return`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>body{font-family:Arial,sans-serif;margin:0;padding:0;color:#222;}@media print{.no-print{display:none}}</style>
+  </head><body><div style="padding:24px 28px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:14px;border-bottom:3px solid #1a3a6b;">
+    <div>
+      <div style="font-size:2.2rem;font-weight:900;letter-spacing:4px;line-height:1;">
+        <span style="color:#1a3a6b;">AD</span><span style="color:#2a7a3b;">2</span>
+      </div>
+      <div style="font-size:.7rem;color:#666;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">Prestadora de Serviços</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:1.1rem;font-weight:700;color:#1a3a6b;text-transform:uppercase;letter-spacing:2px;">${titulo}</div>
+      <div style="font-size:.8rem;color:#666;margin-top:3px;">Período: ${periodo}</div>
+      <div style="font-size:.72rem;color:#999;margin-top:2px;">Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
+  </div>`;
+}
+
+function rodapePDF(){
+  return`<div style="margin-top:30px;padding-top:12px;border-top:1px solid #ddd;text-align:center;font-size:.7rem;color:#aaa;">
+    AD2 Prestadora de Serviços — Sistema de Ponto Digital
+  </div></div>
+  <div class="no-print" style="position:fixed;bottom:20px;right:20px;">
+    <button onclick="window.print()" style="background:#1a3a6b;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">🖨️ Imprimir / Salvar PDF</button>
+  </div></body></html>`;
+}
+
+function abrirJanelaPDF(html){
+  const w=window.open('','_blank'); w.document.write(html); w.document.close();
+}
+
+// ── MODAIS ──
+function abrirModal(id){document.getElementById(id).classList.add('open');}
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});});
+
+// ── INIT ──
+(async function(){
+  await loadState();
+  const p=new URLSearchParams(location.search);
+  const fid=p.get('func');
+  if(fid) carregarFuncPonto(fid);
+})();
+</script>
+</body>
+</html>
